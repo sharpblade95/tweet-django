@@ -3,6 +3,7 @@ from .models import Tweet
 from django.views.generic import DetailView , ListView , CreateView , UpdateView , DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
+from .forms import TweetModelForm
 # Create your views here.
 
 class TweetDetailView(DetailView):
@@ -20,12 +21,17 @@ class TweetListView(ListView):
 
 	def get_context_data(self, **kwargs):
 	    context = super().get_context_data(**kwargs)
+	    context['create_form'] = TweetModelForm()
+	    context['create_url']= reverse_lazy('tweet:create')
 	    return context
 
 class TweetCreateView(CreateView):
 	model = Tweet
-	fields = ['content']
+	form_class = TweetModelForm
 	template_name = "tweets/create_view.html"
+	def form_valid(self , form):
+		form.instance.user = self.request.user
+		return super().form_valid(form) 
 
 class TweetUpdateView(UpdateView):
 	model = Tweet

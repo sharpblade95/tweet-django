@@ -2,8 +2,12 @@
 
 
 {% block content %}
-
-	{% for tweet in object_list %}
+		
+		{% if not request.GET.q %}
+			{% include 'tweets/form.html' with form=create_form action_url=create_url btn_title='Tweet' %}
+		{% endif %}
+		<hr>
+		{% for tweet in object_list %}
 		<div class="card">
 			<div class="card-header">
 				<span class="font-weighted-bold">{{tweet.user}} | {{tweet.updated}}</span>
@@ -14,7 +18,8 @@
 			<div class="card-footer text-center text-muted">
 				<a href="{% url 'tweet:update' tweet.pk %}">Edit</a> | <a href="{% url 'tweet:delete' tweet.pk %}">Delete</a>
 			</div>
-		</div>
+				</div>
+
 	{% endfor %}
 {%endblock content %}
 
