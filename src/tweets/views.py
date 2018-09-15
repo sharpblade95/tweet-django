@@ -1,32 +1,38 @@
 from django.shortcuts import render
 from .models import Tweet
-from django.views.generic import DetailView , ListView
-
+from django.views.generic import DetailView , ListView , CreateView , UpdateView , DeleteView
+from django.urls import reverse_lazy
+from django.db.models import Q
 # Create your views here.
 
-class TweetDetailView (DetailView):
-	queryset = Tweet.objects.all()
+class TweetDetailView(DetailView):
+	model = Tweet
 	template_name = "tweets/detail_view.html"
-	def get_object(self):
-		return Tweet.objects.get(id=1)
 
 class TweetListView(ListView):
 	template_name = "tweets/list_view.html"
-	queryset = Tweet.objects.all()
+	def get_queryset(self):
+		qs = Tweet.objects.all()
+		query = self.request.GET.get("q",None)
+		if query is not None:
+			qs = qs.filter(Q(content__icontains = query))
+		return qs
 
-def tweet_detil_view(request, id=1):
-	obj = Tweet.objects.get(id=id)
-	context = {
-		"object":obj
-	}
-	return render(request, "tweets/detail_view.html",context)
+	def get_context_data(self, **kwargs):
+	    context = super().get_context_data(**kwargs)
+	    return context
 
+class TweetCreateView(CreateView):
+	model = Tweet
+	fields = ['content']
+	template_name = "tweets/create_view.html"
 
+class TweetUpdateView(UpdateView):
+	model = Tweet
+	fields = ['content']
+	template_name = 'tweets/update_view.html'
 
-def tweet_list_view(request):
-	objlist = Tweet.objects.all()
-	context = {
-		"object_list" : objlist
-	}
-	return render(request, "tweets/list_view.html",context)
-	
+class TweetDeleteView(DeleteView):
+	model = Tweet
+	template_name = 'tweets/delete_confirm.html'
+	success_url = reverse_lazy('tweet:list')
